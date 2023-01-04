@@ -1,0 +1,95 @@
+create table DEPARTMENT(dno number primary key, dname varchar(100) not 
+null, mgrstartdate date);
+
+create table EMPLOYEE(ssn number primary key, name varchar(100) not null, 
+address varchar(200), sex char(1), salary number, superssn number references 
+EMPLOYEE on delete cascade, dno number references DEPARTMENT on 
+delete cascade);
+
+create table DLOCATION(dno number, dloc varchar(100) , primary key (dno,
+dloc), foreign key(dno) references DEPARTMENT on delete cascade);
+
+create table PROJECT(pno number primary key, pname varchar(100) not null, 
+plocation varchar(100), dno number references DEPARTMENT on delete 
+cascade);
+
+create table WORKS_ON(ssn number, pno number, hours number, primary 
+key(ssn,pno), foreign key(ssn) references EMPLOYEE on delete cascade, 
+foreign key(pno) references PROJECT on delete cascade);
+
+alter table DEPARTMENT add mgrssn number references EMPLOYEE on 
+delete cascade;
+
+
+
+insert into DEPARTMENT(dno,dname) values(1,'Accounts');
+insert into DEPARTMENT(dno,dname) values(2,'Research');
+insert into DEPARTMENT(dno,dname) values(3,'Computer');
+insert into DEPARTMENT(dno,dname) values(4,'Mechanical');
+insert into DEPARTMENT(dno,dname) values(5,'Electronics');
+
+insert into EMPLOYEE values(1001,'Syed','Bangalore','M',700000,Null,3);
+insert into EMPLOYEE values(1002,'Mustafa','Bangalore','M',500000,1001,3);
+insert into EMPLOYEE values(1003,'Royal Scott','London','M',800000,Null,1);
+insert into EMPLOYEE values(1004,'Liju','Mysore','M',500000,1003,1);
+insert into EMPLOYEE values(1005,'Sushma','Bangalore','F',650000,Null,2);
+update DEPARTMENT set mgrssn=1001, mgrstartdate=to_date('10/10/2000',
+'dd/mm/yyyy') where dno=3;
+update DEPARTMENT set mgrssn=1003, mgrstartdate=to_date('20/12/2010',
+'dd/mm/yyyy') where dno=1;
+update DEPARTMENT set mgrssn=1005, mgrstartdate=to_date('15/11/2005',
+'dd/mm/yyyy') where dno=2;
+update DEPARTMENT set mgrssn=1001, mgrstartdate=to_date('10/10/2000', 
+'dd/mm/yyyy') where dno=4;
+update DEPARTMENT set mgrssn=1001, mgrstartdate=to_date('10/10/2000', 
+'dd/mm/yyyy') where dno=5;
+
+insert into DLOCATION values(1, 'Bangalore');
+insert into DLOCATION values(2, 'Mysore');
+insert into DLOCATION values(3, 'Bangalore');
+insert into DLOCATION values(4, 'Hassan');
+insert into DLOCATION values(5, 'Bangalore');
+
+insert into PROJECT values(101,'IOT','Bangalore',5);
+insert into PROJECT values(102,'Embedded','mysore',5);
+insert into PROJECT values(103,'Web design','Bangalore',3);
+insert into PROJECT values(104,'Unix','Bangalore',3);
+insert into PROJECT values(105,'Robotics','Bangalore',4);
+insert into PROJECT values(106,'college','Bangalore',1);
+
+insert into WORKS_ON values(1001,101, 40);
+insert into WORKS_ON values(1002,101, 30);
+insert into WORKS_ON values(1003,102, 45);
+insert into WORKS_ON values(1004,102, 40);
+insert into WORKS_ON values(1005,103, 30);
+
+
+
+select pno from EMPLOYEE natural join WORKS_ON where name like '%Scott'
+union
+select pno from PROJECT where dno in(select DEPARTMENT.dno from 
+EMPLOYEE, DEPARTMENT where ssn=mgrssn and name like '%Scott');
+
+Select E.ssn, name,salary from EMPLOYEE E, WORKS_ON W, PROJECT P where 
+E.ssn=W.ssn and W.pno=P.pno and pname='IOT';
+Update EMPLOYEE set salary=1.1*salary where ssn in (Select ssn from WORKS_ON 
+W, PROJECT P where W.pno=P.pno and pname='IOT');
+Select E.ssn, name,salary from EMPLOYEE E, WORKS_ON W, PROJECT P where 
+E.ssn=W.ssn and W.pno=P.pno and pname='IOT';
+
+
+select dname, sum(salary), max(salary) , min(salary), avg(salary) from 
+EMPLOYEE natural join DEPARTMENT group by dno, dname having 
+dname='Accounts';
+
+select name from EMPLOYEE a where not exists 
+( select * from WORKS_ON b where ( b.pno in ( select pno from PROJECT
+where dno = 5 ) and not exists 
+( select * from WORKS_ON c where c.ssn = a.ssn and c.pno = b.pno )));
+
+
+select dno, dname,count(*) from EMPLOYEE natural join DEPARTMENT where 
+salary>600000 and dno in(select dno from EMPLOYEE natural join DEPARTMENT
+group by dno having count(*)>5) group by dno, dname
+
+
