@@ -1,0 +1,45 @@
+Create table SALESMAN (Salesman_id number primary key, Name 
+varchar(50), City varchar(50), Commission number(6,2));
+
+Create table CUSTOMER (Customer_id number primary key, Cust_Name 
+varchar(50), City varchar(50), Grade number, Salesman_id number 
+references salesman on delete cascade);
+
+Create table ORDERS (Ord_No number primary key, Purchase_Amt number, 
+Ord_Date date, Customer_id number references customer on delete 
+cascade, Salesman_id number references salesman on delete cascade);
+
+
+select count(*) from customer where grade>=(select avg(grade) from customer where 
+city='Bangalore')
+
+
+select name, count(*)as No_of_customers from customer, salesman where 
+customer.SALESMAN_ID=salesman.SALESMAN_ID group by 
+customer.SALESMAN_ID, name having count(*)>1 order by customer.SALESMAN_ID
+
+
+select salesman.SALESMAN_ID, name, salesman.city, count(Customer_id) as 
+No_of_customers from salesman, customer where salesman.SALESMAN_ID = 
+customer.SALESMAN_ID and salesman.city = customer.city group by 
+salesman.SALESMAN_ID, name, salesman.city 
+union 
+select SALESMAN_ID, name, city, 0 from salesman where SALESMAN_ID not in
+(select salesman.SALESMAN_ID from salesman, customer where 
+salesman.SALESMAN_ID = customer.SALESMAN_ID and salesman.city = 
+customer.city group by salesman.SALESMAN_ID) group by SALESMAN_ID, name,
+city
+
+
+
+Create view Highest_Order_View (Salesman_id, Salesman_name, Customer_id,
+Customer_name, Purchase_Amount, Order_date) as select salesman.salesman_id, 
+name, customer.customer_id, cust_name, purchase_amt, ord_Date from salesman, 
+customer, orders where salesman.SALESMAN_ID= customer.SALESMAN_ID and 
+salesman.SALESMAN_ID= orders.SALESMAN_ID and customer.customer_id =
+orders.customer_id and purchase_amt= (select max(purchase_amt) from orders)
+select * from Highest_Order_View;
+
+
+delete from salesman where salesman_id=1;
+ select * from salesman;
