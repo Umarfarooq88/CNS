@@ -1,0 +1,57 @@
+Create table publisher (Name varchar(50) primary key, Address varchar(100), 
+Phone number(10));
+
+Create table BOOK (Book_id number primary key, Title varchar(100), 
+Publisher_Name varchar(100) references publisher on delete cascade, 
+Pub_Year number(4));
+
+Create table BOOK_AUTHORS (Book_id number, Author_Name 
+varchar(100), primary key(Book_id, Author_Name), foreign key(Book_id) 
+references BOOK on delete cascade );
+4. Create table LIBRARY_PROGRAMME (Programme_id number primary key, 
+Programme_Name varchar(100), Address varchar(100));
+
+Create table BOOK_COPIES
+(
+Book_id number, Programme_id number, No_of_Copies number, 
+primary key(Book_id, Programme_id), 
+foreign key(Book_id) references BOOK on delete cascade , 
+foreign key(Programme_id) references LIBRARY_PROGRAMME on delete 
+cascade );
+
+Create table BOOK_LENDING (Book_id number, Programme_id number, 
+Card_No number, Date_Out date, Due_Date date,
+Primary key(Book_id, Programme_id, Card_No),
+foreign key(Book_id) references BOOK on delete cascade , 
+foreign key(Programme_id) references LIBRARY_PROGRAMME on delete 
+cascade );
+
+
+select bk.book_id, title, publisher_name, author_name, no_of_copies, programme_name 
+from book bk, book_authors ba, library_programme lp, book_copies bc
+where bk.book_id=ba.book_id and bk.book_id=bc.book_id and bc. Programme_id=lp. 
+Programme_id 
+order by programme_name, bk.book_id;
+
+
+select card_no as borrower,count(*) as noofbooksborrowed from book_lending where 
+date_out between TO_DATE('01/01/2017', 'DD/MM/YYYY') and TO_DATE('30/06/2017', 
+'DD/MM/YYYY') group by card_no having count(*)>3;
+
+
+delete from book where book_id=103;
+
+
+create view book_part as select book_id,pub_year from book;
+select * from book_part;
+
+
+create view book_view (book_id,Title, No_of_copies) as Select book.book_id, Title, 
+sum(No_of_Copies) from book, book_copies where book.book_id=book_copies.book_id 
+group by book.book_id,title order by book.book_id;
+
+select * from book_view;
+
+
+
+
